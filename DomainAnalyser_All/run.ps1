@@ -42,6 +42,7 @@ $Result = [PSCustomObject]@{
     ExpectedSPFRecord    = ''
     ActualSPFRecord      = ''
     SPFPassAll           = ''
+    ActualMXRecords      = ''
     MXPassTest           = ''
     DMARCPresent         = ''
     DMARCFullPolicy      = ''
@@ -51,6 +52,7 @@ $Result = [PSCustomObject]@{
     DNSSECPresent        = ''
     MailProvider         = ''
     DKIMEnabled          = ''
+    DKIMRecords          = ''
     Score                = ''
     MaximumScore         = 160
     ScorePercentage      = ''
@@ -79,6 +81,7 @@ $MXRecord = Read-MXRecord -Domain $Domain -ErrorAction Stop
 
 $Result.ExpectedSPFRecord = $MXRecord.ExpectedInclude
 $Result.MXPassTest = $false
+$Result.ActualMXRecords = $MXRecord.Records
 
 # Check fail counts to ensure all tests pass
 #$MXWarnCount = $MXRecord.ValidationWarns | Measure-Object | Select-Object -ExpandProperty Count
@@ -216,6 +219,7 @@ try {
     if ($DkimRecordCount -gt 0 -and $DkimFailCount -eq 0) {
         $Result.DKIMEnabled = $true
         $ScoreDomain += $Scores.DKIMActiveAndWorking
+        $Result.DKIMRecords = $DkimRecord.Records | Select-Object Selector, Record
     } else {
         $Result.DKIMEnabled = $false
         $ScoreExplanation.Add('DKIM Not Configured') | Out-Null
